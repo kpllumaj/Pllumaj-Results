@@ -1,0 +1,92 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
+
+export default function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [message, setMessage] = useState("");
+  const router = useRouter();
+  const { user, logout, loading, refresh } = useAuth();
+
+  useEffect(() => {
+    if (loading) return;
+    if (user) {
+      setMessage(`Welcome ${user.email} (${user.role})`);
+      router.replace("/dashboard");
+    } else {
+      setMessage("");
+    }
+  }, [user, loading, router]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setMessage("Logging in...");
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Login failed");
+
+      localStorage.setItem("token", data.token);
+      refresh();
+      setMessage(`Logged in as ${data.user.email} (${data.user.role})`);
+    } catch (err: any) {
+      setMessage(err.message ?? "Login failed");
+    }
+  }
+
+  function handleLogout() {
+    logout();
+    setMessage("Logged out");
+    router.replace("/login");
+  }
+
+  const isLoggedIn = Boolean(user);
+
+  return (
+    <div className="max-w-sm mx-auto mt-10 p-6 border rounded-2xl shadow">
+      <h1 className="text-2xl font-bold mb-4 text-center">Sign In</h1>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+        <input
+          type="email"
+          placeholder="Email"
+          className="border p-2 rounded"
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          required
+          disabled={isLoggedIn}
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          className="border p-2 rounded"
+          value={password}
+          onChange={(event) => setPassword(event.target.value)}
+          required
+          disabled={isLoggedIn}
+        />
+        <button type="submit" className="bg-green-600 text-white py-2 rounded hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-400" disabled={isLoggedIn}>
+          Login
+        </button>
+      </form>
+
+      {isLoggedIn ? (
+        <button
+          onClick={handleLogout}
+          className="mt-4 w-full bg-gray-500 text-white py-2 rounded hover:bg-gray-600"
+        >
+          Logout
+        </button>
+      ) : null}
+
+      {message ? <p className="mt-4 text-center text-sm text-gray-700">{message}</p> : null}
+    </div>
+  );
+}

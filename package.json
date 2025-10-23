@@ -1,0 +1,23 @@
+{
+  "name": "pllumaj-results",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+  "dev:web": "pnpm --filter web dev",
+  "dev:api": "pnpm --filter api start:dev",
+  "build:web": "pnpm --filter web build",
+  "build:api": "pnpm --filter api build",
+
+  "lint": "pnpm -r exec eslint . || true",
+  "typecheck": "pnpm -r exec tsc -p tsconfig.json --noEmit || true",
+  "format": "prettier \"**/*.{ts,tsx,js,json,md,css,scss}\" --write",
+  "prisma:check": "pnpm -C apps/api exec prisma format && pnpm -C apps/api exec prisma validate",
+  "check:all": "pnpm run prisma:check && pnpm run lint && pnpm run typecheck && pnpm -r run build && pnpm -r run test",
+  "lint:web": "pnpm --filter web lint",
+  "lint:api": "pnpm --filter api lint",
+  "test": "pnpm --filter api test",
+  "dev": "pnpm run dev:web"
+}
+
+}
+

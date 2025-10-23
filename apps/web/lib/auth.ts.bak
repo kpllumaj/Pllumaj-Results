@@ -1,0 +1,38 @@
+"use client";
+
+export function isBrowser(): boolean {
+  return typeof window !== "undefined";
+}
+
+export function getToken(): string | null {
+  if (!isBrowser()) {
+    return null;
+  }
+  return window.localStorage.getItem("token");
+}
+
+type JwtPayload = {
+  sub?: string;
+  email?: string;
+  role?: "client" | "expert";
+};
+
+export function parseUser(token: string): { id: string; email: string; role: "client" | "expert" } | null {
+  try {
+    const [, payload] = token.split(".");
+    if (!payload) {
+      return null;
+    }
+    const decoded = JSON.parse(atob(payload)) as JwtPayload;
+    if (decoded?.sub && decoded?.email && decoded?.role) {
+      return {
+        id: decoded.sub,
+        email: decoded.email,
+        role: decoded.role,
+      };
+    }
+  } catch (error) {
+    console.error("Failed to parse auth token", error);
+  }
+  return null;
+}

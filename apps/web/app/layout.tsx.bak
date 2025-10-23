@@ -1,0 +1,28 @@
+import "../app/globals.css";
+import Providers from "@/components/providers";
+import Navbar from "@/components/layout/navbar";
+import { AuthProvider } from "@/context/AuthContext";
+
+export const metadata = {
+  title: "Pllumaj Results",
+  description: "Universal life-solutions platform",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en">
+      <body className="bg-gray-50 text-gray-900">
+        <Providers>
+          <AuthProvider>
+            <Navbar />
+            <main>{children}</main>
+          </AuthProvider>
+        </Providers>
+      </body>
+    </html>
+  );
+}
